@@ -8,14 +8,11 @@ import os
 
 class HelloFrame(wx.Frame):
 
-	def __init__(self, parent):
-
+    terminal = ""
+    def __init__(self, parent):
 		wx.Frame.__init__(self, parent, wx.ID_ANY, "Our Tiny IDE")
-
 		self.panel = wx.Panel(self)
-
 		self.response = wx.StaticText(self.panel, pos=(310, 50))
-		
 		
 		# A wx.TextCtrl
 		# TextCtrl can also take a size=(width, height) argument.
@@ -23,9 +20,20 @@ class HelloFrame(wx.Frame):
 
 		self.btnSubmit = wx.Button(self.panel, label="Compile and Run", pos=(310, 10))
 		self.btnSubmit.Bind(wx.EVT_BUTTON, self.OnSubmitSimple)
+                self.cbShowTitle = wx.CheckBox(self.panel, label='Sticky Terminal', pos=(310, 80))
+		self.cbShowTitle.SetValue(True)
+		self.cbShowTitle.Bind(wx.EVT_CHECKBOX, self.OnToggleShowTitle)
+                global terminal
+                terminal = "gnome-terminal -e 'bash -c \"./a.out; exec bash\"'"
 
-
-	def OnSubmitSimple(self, e):
+    def OnToggleShowTitle(self, e):
+        global terminal
+        isChecked = self.cbShowTitle.GetValue()
+        if isChecked:
+			terminal = "gnome-terminal -e 'bash -c \"./a.out; exec bash\"'"
+        else:
+			terminal = "gnome-terminal -e './a.out'"
+    def OnSubmitSimple(self, e):
          nameString = self.nameBox.GetValue()
          Write(nameString)
 
@@ -39,9 +47,9 @@ def Write(codeString):
          # out, err = proc.communicate()
          # exitcode = proc.returncode
          subprocess.check_output(["gcc","hello.c"])
-         os.system("gnome-terminal -e './a.out'")
+         global terminal
+         os.system(terminal)
 
-# ----------- Main Program Below -----------------
 
 # Define the app
 app = wx.App(False)
